@@ -25,7 +25,9 @@ class Job:
         """ Insert into a DB & return PK"""
         try:
             cursor = conn.cursor()
-            query: str = "INSERT INTO JOB (NAME, FACULTY_ID, ROLE_ID, STATUS_ID, TODAY, DESCRIPTION, COMPLETE) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING ID;" # noqa
+            query: str = "INSERT INTO JOB \
+                            (NAME, FACULTY_ID, ROLE_ID, STATUS_ID, TODAY, DESCRIPTION, COMPLETE) \
+                            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING ID;"
             data: Tuple = (self.name, self.faculty, self.role, self.status, self.date, self.desc, self.complete)  # noqa
             cursor.execute(query, data)
             conn.commit()
@@ -33,8 +35,8 @@ class Job:
         except RuntimeError:
             raise RuntimeError("Could not inser into TABLE JOB.")
 
-    def set_id(self, id: int) -> None:
-        self._id = id
+    def set_id(self, value: int) -> None:
+        self._value = value
 
     def update(self, id: int) -> None:
         """ Update info in DB and change completion status. """
@@ -58,10 +60,12 @@ class Queue:
         self._QUEUE.append(job)
 
     def dequeue(self, id: int) -> None:
+        # rely on DB to dequeue, since it may happen at any position in the array
+        # we'll just change the queue
         if self.__size__() < 1:
             return None
         else:
-            self._QUEUE.pop(0)
+            return self._QUEUE.pop(0)
 
     def __size__(self) -> int:
         return len(self._QUEUE)
