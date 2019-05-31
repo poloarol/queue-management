@@ -2,22 +2,36 @@
 
 from UTILS.structures import Job
 from UTILS.structures import Queue
-from UTILS.structures import DATES
-from datetime import datetime
+from UTILS.db import DB
+
 from typing import Type
+from flask import Flask
+from flask import render_template
 
 q: Type[Queue] = Queue()
+db = DB()
+conn = db.get_connection()
 
-def insert(name: str, faculty: int, role: int, status: int, desc: str, date: DATES):
-    job = Job(name, faculty, role, status, desc, date)
+app = Flask(__name__, template_folder="templates")
+
+def insert(name: str, faculty: int, role: int, status: int, desc: str):  # noqa
+    job = Job(name, faculty, role, status, desc)
     index = job.todb()
+    job.set_id(index)
     q.enqueue(job)
-    print(index)
 
 
-def main():
-    insert("Paula Poe", 2, 2, 1, "dafsda", datetime.now())
+def update(id: int) -> None:
+    job = q.pop()
+    job.update(id)
+
+
+@app.route("/")
+def home(lang: str):
+    cursor = conn.cursor()
+    query = "SELECT "
+    return "Ho! Ho! Ho!"
 
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
